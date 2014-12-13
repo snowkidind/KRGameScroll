@@ -7,43 +7,48 @@
 //
 
 #import "GameScene.h"
+#import "KRGameScroll.h"
+#import "MenuPageTemplate.h"
 
 @implementation GameScene
 
 -(void)didMoveToView:(SKView *)view {
-    /* Setup your scene here */
-    SKLabelNode *myLabel = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+
+    KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self];
     
-    myLabel.text = @"Hello, World!";
-    myLabel.fontSize = 65;
-    myLabel.position = CGPointMake(CGRectGetMidX(self.frame),
-                                   CGRectGetMidY(self.frame));
+    // here we make menu pages and add them to the stack
+    MenuPageTemplate *menuPage = [[MenuPageTemplate alloc] initFromScene:self page:1];
+    [scrollMenu.pages addObject:menuPage];
     
-    [self addChild:myLabel];
+    MenuPageTemplate *menuPage2 = [[MenuPageTemplate alloc] initFromScene:self page:2];
+    [scrollMenu.pages addObject:menuPage2];
+    
+    MenuPageTemplate *menuPage3 = [[MenuPageTemplate alloc] initFromScene:self page:3];
+    [scrollMenu.pages addObject:menuPage3];
+    
+    MenuPageTemplate *menuPage4 = [[MenuPageTemplate alloc] initFromScene:self page:4];
+    [scrollMenu.pages addObject:menuPage4];
+    
+    [scrollMenu drawPagesAtIndex:1]; // place at starting index
+    
+    // if we are starting the program from install, index is set in App Delegate
+    // index auto scrolls to last selected page.
+    int scrollPage = (int)[[NSUserDefaults standardUserDefaults] integerForKey:@"scrollPage"];
+    [scrollMenu initialMoveToPage:scrollPage]; // animate to selected position.
+    
+    [self addChild:scrollMenu];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     /* Called when a touch begins */
     
-    for (UITouch *touch in touches) {
-        CGPoint location = [touch locationInNode:self];
-        
-        SKSpriteNode *sprite = [SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];
-        
-        sprite.xScale = 0.5;
-        sprite.yScale = 0.5;
-        sprite.position = location;
-        
-        SKAction *action = [SKAction rotateByAngle:M_PI duration:1];
-        
-        [sprite runAction:[SKAction repeatActionForever:action]];
-        
-        [self addChild:sprite];
-    }
 }
+
 
 -(void)update:(CFTimeInterval)currentTime {
     /* Called before each frame is rendered */
 }
+
+
 
 @end

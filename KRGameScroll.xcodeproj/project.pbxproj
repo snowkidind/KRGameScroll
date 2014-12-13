@@ -10,12 +10,19 @@
 		06F8E1A91A3B9DB600552158 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1A81A3B9DB600552158 /* main.m */; };
 		06F8E1AC1A3B9DB600552158 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1AB1A3B9DB600552158 /* AppDelegate.m */; };
 		06F8E1AF1A3B9DB600552158 /* GameScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1AE1A3B9DB600552158 /* GameScene.m */; };
-		06F8E1B11A3B9DB600552158 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1B01A3B9DB600552158 /* GameScene.sks */; };
 		06F8E1B41A3B9DB600552158 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1B31A3B9DB600552158 /* GameViewController.m */; };
 		06F8E1B71A3B9DB600552158 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1B51A3B9DB600552158 /* Main.storyboard */; };
 		06F8E1B91A3B9DB600552158 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1B81A3B9DB600552158 /* Images.xcassets */; };
 		06F8E1BC1A3B9DB600552158 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1BA1A3B9DB600552158 /* LaunchScreen.xib */; };
 		06F8E1C81A3B9DB600552158 /* KRGameScrollTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1C71A3B9DB600552158 /* KRGameScrollTests.m */; };
+		06F8E1D31A3BA22A00552158 /* KRGameScroll.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1D21A3BA22A00552158 /* KRGameScroll.m */; };
+		06F8E1D61A3BA5A600552158 /* MenuPageTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1D51A3BA5A600552158 /* MenuPageTemplate.m */; };
+		06F8E1E31A3BAD8D00552158 /* largeNavBox@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1DF1A3BAD8D00552158 /* largeNavBox@2x.png */; };
+		06F8E1E41A3BAD8D00552158 /* smallNavBox.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E01A3BAD8D00552158 /* smallNavBox.png */; };
+		06F8E1E51A3BAD8D00552158 /* smallNavBox@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E11A3BAD8D00552158 /* smallNavBox@2x.png */; };
+		06F8E1E61A3BAD8D00552158 /* largeNavBox.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E21A3BAD8D00552158 /* largeNavBox.png */; };
+		06F8E1E81A3BAE0400552158 /* goTo.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E71A3BAE0400552158 /* goTo.png */; };
+		06F8E1EB1A3BB74600552158 /* AnotherScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1EA1A3BB74600552158 /* AnotherScene.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +43,6 @@
 		06F8E1AB1A3B9DB600552158 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		06F8E1AD1A3B9DB600552158 /* GameScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameScene.h; sourceTree = "<group>"; };
 		06F8E1AE1A3B9DB600552158 /* GameScene.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameScene.m; sourceTree = "<group>"; };
-		06F8E1B01A3B9DB600552158 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
 		06F8E1B21A3B9DB600552158 /* GameViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameViewController.h; sourceTree = "<group>"; };
 		06F8E1B31A3B9DB600552158 /* GameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameViewController.m; sourceTree = "<group>"; };
 		06F8E1B61A3B9DB600552158 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -45,6 +51,17 @@
 		06F8E1C11A3B9DB600552158 /* KRGameScrollTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KRGameScrollTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		06F8E1C61A3B9DB600552158 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		06F8E1C71A3B9DB600552158 /* KRGameScrollTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KRGameScrollTests.m; sourceTree = "<group>"; };
+		06F8E1D11A3BA22A00552158 /* KRGameScroll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRGameScroll.h; sourceTree = "<group>"; };
+		06F8E1D21A3BA22A00552158 /* KRGameScroll.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRGameScroll.m; sourceTree = "<group>"; };
+		06F8E1D41A3BA5A600552158 /* MenuPageTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuPageTemplate.h; path = ../MenuPageTemplate.h; sourceTree = "<group>"; };
+		06F8E1D51A3BA5A600552158 /* MenuPageTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuPageTemplate.m; path = ../MenuPageTemplate.m; sourceTree = "<group>"; };
+		06F8E1DF1A3BAD8D00552158 /* largeNavBox@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "largeNavBox@2x.png"; sourceTree = "<group>"; };
+		06F8E1E01A3BAD8D00552158 /* smallNavBox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = smallNavBox.png; sourceTree = "<group>"; };
+		06F8E1E11A3BAD8D00552158 /* smallNavBox@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "smallNavBox@2x.png"; sourceTree = "<group>"; };
+		06F8E1E21A3BAD8D00552158 /* largeNavBox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = largeNavBox.png; sourceTree = "<group>"; };
+		06F8E1E71A3BAE0400552158 /* goTo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = goTo.png; sourceTree = "<group>"; };
+		06F8E1E91A3BB74600552158 /* AnotherScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnotherScene.h; sourceTree = "<group>"; };
+		06F8E1EA1A3BB74600552158 /* AnotherScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnotherScene.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,12 +107,22 @@
 				06F8E1AB1A3B9DB600552158 /* AppDelegate.m */,
 				06F8E1AD1A3B9DB600552158 /* GameScene.h */,
 				06F8E1AE1A3B9DB600552158 /* GameScene.m */,
-				06F8E1B01A3B9DB600552158 /* GameScene.sks */,
+				06F8E1D11A3BA22A00552158 /* KRGameScroll.h */,
+				06F8E1D21A3BA22A00552158 /* KRGameScroll.m */,
+				06F8E1D41A3BA5A600552158 /* MenuPageTemplate.h */,
+				06F8E1D51A3BA5A600552158 /* MenuPageTemplate.m */,
 				06F8E1B21A3B9DB600552158 /* GameViewController.h */,
 				06F8E1B31A3B9DB600552158 /* GameViewController.m */,
+				06F8E1E91A3BB74600552158 /* AnotherScene.h */,
+				06F8E1EA1A3BB74600552158 /* AnotherScene.m */,
 				06F8E1B51A3B9DB600552158 /* Main.storyboard */,
 				06F8E1B81A3B9DB600552158 /* Images.xcassets */,
 				06F8E1BA1A3B9DB600552158 /* LaunchScreen.xib */,
+				06F8E1DF1A3BAD8D00552158 /* largeNavBox@2x.png */,
+				06F8E1E01A3BAD8D00552158 /* smallNavBox.png */,
+				06F8E1E11A3BAD8D00552158 /* smallNavBox@2x.png */,
+				06F8E1E21A3BAD8D00552158 /* largeNavBox.png */,
+				06F8E1E71A3BAE0400552158 /* goTo.png */,
 				06F8E1A61A3B9DB600552158 /* Supporting Files */,
 			);
 			path = KRGameScroll;
@@ -208,8 +235,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				06F8E1BC1A3B9DB600552158 /* LaunchScreen.xib in Resources */,
+				06F8E1E41A3BAD8D00552158 /* smallNavBox.png in Resources */,
+				06F8E1E81A3BAE0400552158 /* goTo.png in Resources */,
 				06F8E1B91A3B9DB600552158 /* Images.xcassets in Resources */,
-				06F8E1B11A3B9DB600552158 /* GameScene.sks in Resources */,
+				06F8E1E61A3BAD8D00552158 /* largeNavBox.png in Resources */,
+				06F8E1E31A3BAD8D00552158 /* largeNavBox@2x.png in Resources */,
+				06F8E1E51A3BAD8D00552158 /* smallNavBox@2x.png in Resources */,
 				06F8E1B71A3B9DB600552158 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -229,9 +260,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				06F8E1B41A3B9DB600552158 /* GameViewController.m in Sources */,
+				06F8E1D61A3BA5A600552158 /* MenuPageTemplate.m in Sources */,
 				06F8E1AC1A3B9DB600552158 /* AppDelegate.m in Sources */,
+				06F8E1EB1A3BB74600552158 /* AnotherScene.m in Sources */,
 				06F8E1AF1A3B9DB600552158 /* GameScene.m in Sources */,
 				06F8E1A91A3B9DB600552158 /* main.m in Sources */,
+				06F8E1D31A3BA22A00552158 /* KRGameScroll.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +458,7 @@
 				06F8E1CD1A3B9DB600552158 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		06F8E1CE1A3B9DB600552158 /* Build configuration list for PBXNativeTarget "KRGameScrollTests" */ = {
 			isa = XCConfigurationList;
@@ -432,6 +467,7 @@
 				06F8E1D01A3B9DB600552158 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
