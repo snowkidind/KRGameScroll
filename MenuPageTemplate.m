@@ -74,6 +74,7 @@
 // use touchBegan for selection Animations and sound responsiveness
 - (void) notificationTouchBegan:(NSDictionary*) info {
     
+    
     NSNumber *currentScreen = [info objectForKey:@"currentScreen"];
     if ([currentScreen intValue] == _identifier){
         

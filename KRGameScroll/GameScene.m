@@ -14,8 +14,13 @@
 
 -(void)didMoveToView:(SKView *)view {
 
-    KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self];
+    // this default will alternate every time you load the game scene. see AnotherScene.m
+    BOOL vertical = [[NSUserDefaults standardUserDefaults] boolForKey:@"verticalScroll"];
+    KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self vertical:vertical];
     
+    // If you choose not to use vertical scroll this works too
+    // KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self];
+  
     // here we make menu pages and add them to the stack
     MenuPageTemplate *menuPage = [[MenuPageTemplate alloc] initFromScene:self page:1];
     [scrollMenu.pages addObject:menuPage];

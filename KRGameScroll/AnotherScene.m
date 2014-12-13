@@ -33,7 +33,10 @@
 
 - (void) begin{
 
-
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"verticalScroll"])
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"verticalScroll"];
+    else [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"verticalScroll"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

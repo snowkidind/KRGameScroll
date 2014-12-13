@@ -83,11 +83,16 @@ enum
     for (MenuPageTemplate *page in self.pages){
         
         // Asserting position here will position the contents of the page
-        CGPoint point = CGPointMake(acc, 0);
+        CGPoint point;
+        if (isVertical) point = CGPointMake(0, acc);
+        else point = CGPointMake(acc, 0);
         page.position = point;
         page.identifier = i;
         [self addChild:page];
-        acc += _scene.size.width; // position next page to the right by acc.
+        
+        if (isVertical) acc -= _scene.size.height;
+        else acc += _scene.size.width; // position next page to the right by acc.
+        
         i += 1;
     }
     currentScreen_ = index;
@@ -100,8 +105,16 @@ enum
     
     UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInNode:self];
-    lastPosition_ = location.x;
-    startSwipe_ = location.x;
+    
+    if (isVertical) {
+        lastPosition_ = location.y;
+        startSwipe_ = location.y;
+    }
+    else {
+        lastPosition_ = location.x;
+        startSwipe_ = location.x;
+    }
+    
     state_ = kScrollLayerStateIdle;
     
     // notify menu page
@@ -114,7 +127,9 @@ enum
     UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInNode:self];
     
-    int moveDistance = location.x - startSwipe_;
+    int moveDistance;
+    if (isVertical) moveDistance = location.y - startSwipe_;
+    else moveDistance = location.x - startSwipe_;
     
     // If finger is dragged for more distance then minimum - start sliding and cancel pressed buttons.
     if ( (state_ != kScrollLayerStateSliding) && (fabsf(moveDistance) >= self.minimumTouchLengthToSlide)) {
@@ -127,12 +142,23 @@ enum
         // Move individual pages to their relative positions.
         for (SKNode * node in self.pages){
             
-            float newPosition = node.position.x + (location.x - lastPosition_ );
-            CGPoint moveToPosition = CGPointMake(newPosition,0);
+            CGPoint moveToPosition;
+            float newPosition;
+            
+            if (isVertical){
+                newPosition = node.position.y + (location.y - lastPosition_ );
+                moveToPosition = CGPointMake(0,newPosition);
+            }
+            else {
+                newPosition = node.position.x + (location.x - lastPosition_ );
+                moveToPosition = CGPointMake(newPosition,0);
+            }
             node.position = moveToPosition;
         }
     }
-    lastPosition_ = location.x;
+    
+    if (isVertical) lastPosition_ = location.y;
+    else lastPosition_ = location.x;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -142,14 +168,18 @@ enum
     
     // Testing the drag length. offsetLoc is drag length, compared to minimum
     offsetLoc = 0;
-    offsetLoc = (location.x - startSwipe_);
+    
+    if (isVertical) offsetLoc = (location.y - startSwipe_);
+    else offsetLoc = (location.x - startSwipe_);
     
     // Logic to determine roughly what the user did
     if ( offsetLoc < -self.minimumTouchLengthToChangePage) {
-        [self moveToPage: currentScreen_+1];
+        if (isVertical) [self moveToPage: currentScreen_-1];
+        else [self moveToPage: currentScreen_+1];
     }
     else if ( offsetLoc > self.minimumTouchLengthToChangePage) {
-        [self moveToPage: currentScreen_-1];
+        if (isVertical) [self moveToPage: currentScreen_+1];
+        else [self moveToPage: currentScreen_-1];
     }
     else if ((currentScreen_-1) == 0 ) {
         
@@ -178,8 +208,10 @@ enum
 }
 
 - (void) moveToPage:(int)page {
-
-    float screenWidth = _scene.size.width;
+    
+    float screenWidth;
+    if (isVertical) screenWidth = _scene.size.height;
+    else screenWidth = _scene.size.width;
     
     // calculate initial position X values for reference
     int count = (int)[self.pages count];
@@ -190,7 +222,8 @@ enum
     for (int i = 0; i < count; i++){
         
         [initialValuesArray addObject:[NSNumber numberWithInt:initialValue]];
-        initialValue += screenWidth;
+        if (isVertical) initialValue += screenWidth;
+        else initialValue += screenWidth;
     }
 
     BOOL rtz = NO;
@@ -223,8 +256,21 @@ enum
             for (SKNode * node in self.pages){
                 
                 int initialItemValue = (int)[[initialValuesArray objectAtIndex:i] intValue];
-                int newPosition = -(((currentScreen_ +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
-                SKAction *move = [SKAction moveTo:CGPointMake(newPosition, 0) duration:dragDuration];
+                
+                SKAction *move;
+                int newPosition;
+                
+                if (isVertical){
+
+                    newPosition = +(((currentScreen_ +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
+                    move = [SKAction moveTo:CGPointMake(0, newPosition) duration:dragDuration];
+                }
+                
+                else {
+                    newPosition = -(((currentScreen_ +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
+                    move = [SKAction moveTo:CGPointMake(newPosition, 0) duration:dragDuration];
+                }
+                
                 [node runAction:move];
                 
                 i += 1;
@@ -243,8 +289,19 @@ enum
             for (SKNode * node in self.pages){
                 
                 int initialItemValue = (int)[[initialValuesArray objectAtIndex:i] intValue];
-                int newPosition = -(((currentScreen_ - 1)* screenWidth - initialItemValue) - (screenWidth * -(difference + 1)));
-                SKAction *move = [SKAction moveToX:newPosition duration:dragDuration];
+                
+                SKAction *move;
+                int newPosition;
+                
+                if (isVertical){
+                    newPosition = +(((currentScreen_ - 1) * screenWidth - initialItemValue) + (screenWidth * -(difference + 1)));
+                    move = [SKAction moveToY:newPosition duration:dragDuration];
+                }
+                else {
+                    newPosition = -(((currentScreen_ - 1) * screenWidth - initialItemValue) - (screenWidth * -(difference + 1)));
+                    move = [SKAction moveToX:newPosition duration:dragDuration];
+                }
+                
                 [node runAction:move];
                 
                 i += 1;
@@ -267,9 +324,20 @@ enum
         for (SKNode * node in self.pages){
             
             int initialItemValue = (int)[[initialValuesArray objectAtIndex:i] intValue];
-            int newPosition = (initialItemValue - currentScreen_ * screenWidth);
             
-            SKAction *move = [SKAction moveToX:newPosition duration:kShortDragDuration];
+            SKAction *move;
+            int newPosition;
+            
+            if (isVertical){
+                
+                newPosition = -(initialItemValue - currentScreen_ * screenWidth);
+                move = [SKAction moveToY:newPosition duration:kShortDragDuration];
+                
+            }
+            else {
+                newPosition = (initialItemValue - currentScreen_ * screenWidth);
+                move = [SKAction moveToX:newPosition duration:kShortDragDuration];
+            }
             
             [node runAction:move];
             
@@ -361,7 +429,9 @@ enum
     // create a large box, place offstage, downstage center
     SKTexture *largeBoxTex = [SKTexture textureWithImageNamed:@"largeNavBox.png"];
     SKSpriteNode *largeNavBox = [SKSpriteNode spriteNodeWithTexture:largeBoxTex];
-    largeNavBox.position = CGPointMake((_scene.size.width  / 10) * 5 , -_scene.size.height);
+    if (isVertical) largeNavBox.position =
+        CGPointMake(_scene.size.width + largeNavBox.size.width, _scene.size.height / 2 );
+    else largeNavBox.position = CGPointMake((_scene.size.width  / 10) * 5 , -_scene.size.height);
     largeNavBox.name = @"25";
     [navBoxes addObject:largeNavBox];
     [self addChild:largeNavBox];
@@ -371,7 +441,8 @@ enum
         // create a small box, place offstage, downstage center
         SKTexture *smallBoxTex = [SKTexture textureWithImageNamed:@"smallNavBox.png"];
         SKSpriteNode *smallNavBox = [SKSpriteNode spriteNodeWithTexture:smallBoxTex];
-        smallNavBox.position = CGPointMake((_scene.size.width  / 10) * 5 , -_scene.size.height);
+        if (isVertical) smallNavBox.position = CGPointMake(_scene.size.width + smallNavBox.size.width, _scene.size.height / 2);
+        else smallNavBox.position = CGPointMake((_scene.size.width  / 10) * 5 , -_scene.size.height);
         smallNavBox.name = [NSString stringWithFormat:@"%i", (26 + i)];
         [navBoxes addObject:smallNavBox];
         [self addChild:smallNavBox];
@@ -398,9 +469,11 @@ enum
     int negativeOffset = (((smallBoxes + 1) * boxSpacing)/-2) + boxSpacing/2;
     
     // set the accumulator to the width of screen plus the negative offset
-    int accSpacing = _scene.size.width/2 + negativeOffset;
+    int accSpacing;
+    if (isVertical) accSpacing = _scene.size.height/2 - negativeOffset;
+    else accSpacing = _scene.size.width/2 + negativeOffset;
     
-    // going to create an array that contains the drawrering locations of X
+    // create an array that contains the drawrering locations of X
     NSMutableArray *locations = [NSMutableArray arrayWithObjects:nil];
     
     // iterate and add locations to NSMA
@@ -408,7 +481,9 @@ enum
         
         NSNumber *xCoord = [NSNumber numberWithInt:accSpacing];
         [locations addObject:xCoord];
-        accSpacing += boxSpacing;
+        
+        if (isVertical)accSpacing -= boxSpacing;
+        else accSpacing += boxSpacing;
     }
     
     int x = 0;
@@ -429,7 +504,9 @@ enum
             
             // small boxes' tags start from 26. add box to location and subtract one
             SKSpriteNode *small = (SKSpriteNode*)[self childNodeWithName:[NSString stringWithFormat:@"%i", 24 + smBoxes]];
-            SKAction *moveAction = [SKAction moveTo:CGPointMake([xCoord intValue],_scene.size.height / 10 * .6) duration:.25];
+            SKAction *moveAction;
+            if (isVertical) moveAction = [SKAction moveTo:CGPointMake(_scene.size.width / 10 * 9.4, [xCoord intValue]) duration:.25];
+            else moveAction = [SKAction moveTo:CGPointMake([xCoord intValue],_scene.size.height / 10 * .6) duration:.25];
             [small runAction:moveAction];
             smBoxes -=1;
         }
@@ -437,7 +514,9 @@ enum
             
             // large box, since there is only one; it's tag is 25
             SKSpriteNode *large = (SKSpriteNode*)[self childNodeWithName:@"25"];
-            SKAction *moveAction = [SKAction moveTo:CGPointMake([xCoord intValue],_scene.size.height / 10 * .6) duration:.25];
+            SKAction *moveAction;
+            if (isVertical) moveAction = [SKAction moveTo:CGPointMake(_scene.size.width / 10 * 9.4, [xCoord intValue]) duration:.25];
+            else moveAction = [SKAction moveTo:CGPointMake([xCoord intValue],_scene.size.height / 10 * .6) duration:.25];
             [large runAction:moveAction];
         }
         x += 1;

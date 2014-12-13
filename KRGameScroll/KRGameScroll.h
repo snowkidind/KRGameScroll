@@ -37,6 +37,7 @@
 @property(readwrite, assign) int minimumTouchLengthToChangePage;
 
 - (id)initWithScene:(SKScene*)scene;
+- (id)initWithScene:(SKScene*)scene vertical:(BOOL)vertical;
 - (void) drawPagesAtIndex:(int)index;
 - (void) initialMoveToPage:(int)page;
 - (void) moveToPage:(int)page;
