@@ -3,8 +3,8 @@
 //  KRGameScroll
 //
 //  Created by Keny Ruyter on 12/12/14.
-//  Copyright (c) 2014 Art Of Communication, Inc. All rights reserved.
-//
+//  Copyright (c) 2014 Keny Ruyter
+//  keny@eastcoastbands.com
 
 #import "KRGameScroll.h"
 #import "MenuPageTemplate.h"
@@ -15,13 +15,11 @@ enum
     kScrollLayerStateSliding,
 };
 
+// custom configuration variables 1 of 2
 #define kShortDragDuration .10
 #define kLongDragDuration .25
 
 @implementation KRGameScroll
-
-@synthesize minimumTouchLengthToSlide = minimumTouchLengthToSlide_;
-@synthesize minimumTouchLengthToChangePage = minimumTouchLengthToChangePage_;
 
 - (id)initWithScene:(SKScene*)scene
 {
@@ -61,18 +59,20 @@ enum
     
     _pages = [NSMutableArray arrayWithObjects:nil];
     
-    minimumTouchLengthToSlide_ = 5;
-    minimumTouchLengthToChangePage_ = 20;
-    currentScreen_ = 1;
+    // custom configuration variables 2 of 2
+    showNavBoxes = YES;
+    minimumSlideLength = 5;
+    minimumDragThreshold = 20;
+    currentScreen = 1;
     
-    self ->_observers = [NSMutableSet set];
+    self ->observers = [NSMutableSet set];
     __weak __typeof(self) weaklyNotifiedSelf = self;
     
     id ob = [[NSNotificationCenter defaultCenter] addObserverForName:@"sceneChange" object:nil queue:nil usingBlock:^(NSNotification *n) {
         [weaklyNotifiedSelf cleanUpAfterSceneChange];
     }];
     
-    [_observers addObject:ob];
+    [observers addObject:ob];
 }
 - (void) drawPagesAtIndex:(int)index {
     
@@ -95,9 +95,11 @@ enum
         
         i += 1;
     }
-    currentScreen_ = index;
-    [self drawNavBoxes];
-
+    currentScreen = index;
+    
+    if (showNavBoxes){
+        [self drawNavBoxes];
+    }
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -107,18 +109,18 @@ enum
     CGPoint location = [touch locationInNode:self];
     
     if (isVertical) {
-        lastPosition_ = location.y;
-        startSwipe_ = location.y;
+        lastPosition = location.y;
+        startSwipe = location.y;
     }
     else {
-        lastPosition_ = location.x;
-        startSwipe_ = location.x;
+        lastPosition = location.x;
+        startSwipe = location.x;
     }
     
-    state_ = kScrollLayerStateIdle;
+    state = kScrollLayerStateIdle;
     
     // notify menu page
-    NSDictionary *update = [NSDictionary dictionaryWithObjectsAndKeys:touches, @"touches", event, @"event", [NSNumber numberWithInt:currentScreen_ ], @"currentScreen", nil];
+    NSDictionary *update = [NSDictionary dictionaryWithObjectsAndKeys:touches, @"touches", event, @"event", [NSNumber numberWithInt:currentScreen ], @"currentScreen", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"touchesBegan" object:update];
 }
 
@@ -128,16 +130,16 @@ enum
     CGPoint location = [touch locationInNode:self];
     
     int moveDistance;
-    if (isVertical) moveDistance = location.y - startSwipe_;
-    else moveDistance = location.x - startSwipe_;
+    if (isVertical) moveDistance = location.y - startSwipe;
+    else moveDistance = location.x - startSwipe;
     
     // If finger is dragged for more distance then minimum - start sliding and cancel pressed buttons.
-    if ( (state_ != kScrollLayerStateSliding) && (fabsf(moveDistance) >= self.minimumTouchLengthToSlide)) {
-        state_ = kScrollLayerStateSliding;
+    if ( (state != kScrollLayerStateSliding) && (fabsf(moveDistance) >= minimumSlideLength)) {
+        state = kScrollLayerStateSliding;
     }
     
     // drag ourselves along with user finger
-    if (state_ == kScrollLayerStateSliding) {
+    if (state == kScrollLayerStateSliding) {
         
         // Move individual pages to their relative positions.
         for (SKNode * node in self.pages){
@@ -146,19 +148,19 @@ enum
             float newPosition;
             
             if (isVertical){
-                newPosition = node.position.y + (location.y - lastPosition_ );
+                newPosition = node.position.y + (location.y - lastPosition );
                 moveToPosition = CGPointMake(0,newPosition);
             }
             else {
-                newPosition = node.position.x + (location.x - lastPosition_ );
+                newPosition = node.position.x + (location.x - lastPosition );
                 moveToPosition = CGPointMake(newPosition,0);
             }
             node.position = moveToPosition;
         }
     }
     
-    if (isVertical) lastPosition_ = location.y;
-    else lastPosition_ = location.x;
+    if (isVertical) lastPosition = location.y;
+    else lastPosition = location.x;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -167,36 +169,36 @@ enum
     CGPoint location = [touch locationInNode:self];
     
     // Testing the drag length. offsetLoc is drag length, compared to minimum
-    offsetLoc = 0;
+    int offsetLoc = 0;
     
-    if (isVertical) offsetLoc = (location.y - startSwipe_);
-    else offsetLoc = (location.x - startSwipe_);
+    if (isVertical) offsetLoc = (location.y - startSwipe);
+    else offsetLoc = (location.x - startSwipe);
     
     // Logic to determine roughly what the user did
-    if ( offsetLoc < -self.minimumTouchLengthToChangePage) {
-        if (isVertical) [self moveToPage: currentScreen_-1];
-        else [self moveToPage: currentScreen_+1];
+    if ( offsetLoc < -minimumDragThreshold) {
+        if (isVertical) [self moveToPage: currentScreen-1];
+        else [self moveToPage: currentScreen+1];
     }
-    else if ( offsetLoc > self.minimumTouchLengthToChangePage) {
-        if (isVertical) [self moveToPage: currentScreen_+1];
-        else [self moveToPage: currentScreen_-1];
+    else if ( offsetLoc > minimumDragThreshold) {
+        if (isVertical) [self moveToPage: currentScreen+1];
+        else [self moveToPage: currentScreen-1];
     }
-    else if ((currentScreen_-1) == 0 ) {
+    else if ((currentScreen-1) == 0 ) {
         
-        if ( offsetLoc > self.minimumTouchLengthToChangePage) {
+        if ( offsetLoc > minimumDragThreshold) {
         }
         else{
-            [self moveToPage:currentScreen_];
+            [self moveToPage:currentScreen];
         }
     }
     else {
-        [self moveToPage:currentScreen_];
+        [self moveToPage:currentScreen];
     }
     
-    state_ = kScrollLayerStateIdle;
+    state = kScrollLayerStateIdle;
     
     // notify menu page
-    NSDictionary *update = [NSDictionary dictionaryWithObjectsAndKeys:touches, @"touches", event, @"event", [NSNumber numberWithInt:currentScreen_], @"currentScreen", nil];
+    NSDictionary *update = [NSDictionary dictionaryWithObjectsAndKeys:touches, @"touches", event, @"event", [NSNumber numberWithInt:currentScreen], @"currentScreen", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"touchesEnded" object:update];
     
 }
@@ -234,7 +236,7 @@ enum
     }
     else {
         
-        int difference = (currentScreen_ - page) * -1;
+        int difference = (currentScreen - page) * -1;
         
         // if user initiated the transition use constants for drag duration else calculate based on the travel distance:
         float dragDuration = kLongDragDuration;
@@ -247,9 +249,8 @@ enum
             if (dragDuration < 0) dragDuration *= -1;
         }
         
-        
         // Here we determine which direction the user is going and animate the selected page visible
-        if (page > currentScreen_){
+        if (page > currentScreen){
             // going right
             
             int i = 0;
@@ -262,12 +263,12 @@ enum
                 
                 if (isVertical){
 
-                    newPosition = +(((currentScreen_ +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
+                    newPosition = +(((currentScreen +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
                     move = [SKAction moveTo:CGPointMake(0, newPosition) duration:dragDuration];
                 }
                 
                 else {
-                    newPosition = -(((currentScreen_ +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
+                    newPosition = -(((currentScreen +1) * screenWidth - initialItemValue) + screenWidth * (difference - 1));
                     move = [SKAction moveTo:CGPointMake(newPosition, 0) duration:dragDuration];
                 }
                 
@@ -278,11 +279,11 @@ enum
             
             [self currentScreenWillChange];
             
-            currentScreen_ = page;
+            currentScreen = page;
             [self setDefaultPage:page];
         }
         
-        else if (page < currentScreen_){
+        else if (page < currentScreen){
             
             // going left
             int i = 0;
@@ -294,11 +295,11 @@ enum
                 int newPosition;
                 
                 if (isVertical){
-                    newPosition = +(((currentScreen_ - 1) * screenWidth - initialItemValue) + (screenWidth * -(difference + 1)));
+                    newPosition = +(((currentScreen - 1) * screenWidth - initialItemValue) + (screenWidth * -(difference + 1)));
                     move = [SKAction moveToY:newPosition duration:dragDuration];
                 }
                 else {
-                    newPosition = -(((currentScreen_ - 1) * screenWidth - initialItemValue) - (screenWidth * -(difference + 1)));
+                    newPosition = -(((currentScreen - 1) * screenWidth - initialItemValue) - (screenWidth * -(difference + 1)));
                     move = [SKAction moveToX:newPosition duration:dragDuration];
                 }
                 
@@ -307,7 +308,7 @@ enum
                 i += 1;
             }
             
-            currentScreen_ = page;
+            currentScreen = page;
             [self setDefaultPage:page];
             
             [self currentScreenWillChange];
@@ -330,12 +331,12 @@ enum
             
             if (isVertical){
                 
-                newPosition = -(initialItemValue - currentScreen_ * screenWidth);
+                newPosition = -(initialItemValue - currentScreen * screenWidth);
                 move = [SKAction moveToY:newPosition duration:kShortDragDuration];
                 
             }
             else {
-                newPosition = (initialItemValue - currentScreen_ * screenWidth);
+                newPosition = (initialItemValue - currentScreen * screenWidth);
                 move = [SKAction moveToX:newPosition duration:kShortDragDuration];
             }
             
@@ -348,7 +349,9 @@ enum
         }
     }
     else {
-        [self moveNavBoxes];
+        if (showNavBoxes){
+            [self moveNavBoxes];
+        }
     }
 }
 
@@ -365,14 +368,16 @@ enum
 
 - (void) notifyMenuPagesCurrentScreenChanged {
     
-    NSNumber *update = [NSNumber numberWithInt:currentScreen_];
+    NSNumber *update = [NSNumber numberWithInt:currentScreen];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"screenChanged" object:update];
     
 }
 
 - (void) loadExternalPage {
 
-    NSLog(@"Load a different scene at end of scroller");
+    // NSLog(@"Load a different scene at end of scroller");
+    NSNumber *update = [NSNumber numberWithInt:1];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"loadExternalPage" object:update];
 }
 
 -(void) setDefaultPage:(int)page {
@@ -497,7 +502,7 @@ enum
         BOOL selected = NO;
         
         // which x + 2 does: x (0) page 1(unused) (page2 - bangkok)
-        if (x + 1 == currentScreen_){
+        if (x + 1 == currentScreen){
             selected = YES;
         }
         if (!selected){
@@ -525,7 +530,7 @@ enum
 
 - (void)dealloc
 {
-    for (id ob in _observers){
+    for (id ob in observers){
         [[NSNotificationCenter defaultCenter] removeObserver:ob];
     }
 }

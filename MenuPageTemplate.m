@@ -4,7 +4,7 @@
 //
 //  Created by Keny Ruyter on 12/12/14.
 //  Copyright (c) 2014 Art Of Communication, Inc. All rights reserved.
-//
+//  keny@eastcoastbands.com
 
 // There are two ways you can go about architecting your menu scene.
 // One option would be to try and encapsulate all of your code here (Architecture 1)
@@ -20,22 +20,24 @@
 // we keep a reference to the scene and get our
 // page number in order to be referred to
 
+# define kNodeSelectDuration .15
+
 - (id)initFromScene:(SKScene*)scene page:(int)page{
     self = [super init];
     if (self) {
-        
-        // KRGameScroll will get the touches and pass them here via NSNotification.
-        [self registerObservers];
-        
+ 
         _scene = scene;
-        
-        // the class assumes you are using the entire screen
-        CGRect screenRect = [[UIScreen mainScreen] bounds];
         
         // store node references into an array for quick reference
         nodes = [[NSMutableSet alloc]initWithObjects: nil];
         
+        // KRGameScroll will get the touches and pass them here via NSNotification.
+        [self registerObservers];
+        
         // begin page specific content here
+        
+        // the class assumes you are using the entire screen
+        CGRect screenRect = [[UIScreen mainScreen] bounds];
         
         // may want to determine font size based on phone / tablet
         int fontSize = 24;
@@ -73,7 +75,6 @@
 
 // use touchBegan for selection Animations and sound responsiveness
 - (void) notificationTouchBegan:(NSDictionary*) info {
-    
     
     NSNumber *currentScreen = [info objectForKey:@"currentScreen"];
     if ([currentScreen intValue] == _identifier){
@@ -221,7 +222,7 @@
 }
 
 // This is to give a little popUp action when needed
--(void) scaleAction:(SKNode*)node{
+-(void) scaleAction:(SKNode*)node {
     
     float scaleD = .95;
     float rtnScale = 1;
@@ -244,7 +245,7 @@
 - (void) registerObservers {
     
     // Observe Touch event messages from Menu class, who is receiving touch events
-    self ->_observers = [NSMutableSet set];
+    self ->observers = [NSMutableSet set];
     __weak __typeof(self) weaklyNotifiedSelf = self;
     
     id ob = [[NSNotificationCenter defaultCenter] addObserverForName:@"touchesBegan" object:nil queue:nil usingBlock:^(NSNotification *n) {
@@ -252,14 +253,14 @@
         [weaklyNotifiedSelf notificationTouchBegan:update];
     }];
     
-    [_observers addObject:ob];
+    [observers addObject:ob];
     
     id ob1 = [[NSNotificationCenter defaultCenter] addObserverForName:@"touchesEnded" object:nil queue:nil usingBlock:^(NSNotification *n) {
         NSDictionary *update = [n object];
         [weaklyNotifiedSelf notificationTouchEnded:update];
     }];
     
-    [_observers addObject:ob1];
+    [observers addObject:ob1];
     
     
     id ob2 = [[NSNotificationCenter defaultCenter] addObserverForName:@"screenChanged" object:nil queue:nil usingBlock:^(NSNotification *n) {
@@ -267,12 +268,12 @@
         [weaklyNotifiedSelf notificationScreenChanged:screen];
     }];
     
-    [_observers addObject:ob2];
+    [observers addObject:ob2];
 }
 
 - (void) removeObservers {
     nodes = nil;
-    for (id ob in _observers){
+    for (id ob in observers){
         [[NSNotificationCenter defaultCenter] removeObserver:ob];
     }
 }

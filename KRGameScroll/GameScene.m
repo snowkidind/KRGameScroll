@@ -4,7 +4,7 @@
 //
 //  Created by Keny Ruyter on 12/12/14.
 //  Copyright (c) 2014 Art Of Communication, Inc. All rights reserved.
-//
+//  keny@eastcoastbands.com
 
 #import "GameScene.h"
 #import "KRGameScroll.h"
@@ -14,6 +14,8 @@
 
 -(void)didMoveToView:(SKView *)view {
 
+    [self registerObservers];
+    
     // this default will alternate every time you load the game scene. see AnotherScene.m
     BOOL vertical = [[NSUserDefaults standardUserDefaults] boolForKey:@"verticalScroll"];
     KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self vertical:vertical];
@@ -42,6 +44,26 @@
     [scrollMenu initialMoveToPage:scrollPage]; // animate to selected position.
     
     [self addChild:scrollMenu];
+}
+
+- (void) loadExternalPage {
+    NSLog(@"loadExternalPage");
+}
+
+- (void) registerObservers {
+    self ->observers = [NSMutableSet set];
+    __weak __typeof(self) weaklyNotifiedSelf = self;
+    
+    id ob = [[NSNotificationCenter defaultCenter] addObserverForName:@"loadExternalPage" object:nil queue:nil usingBlock:^(NSNotification *n) {
+        [weaklyNotifiedSelf loadExternalPage];
+    }];
+    [observers addObject:ob];
+}
+
+- (void) removeObservers {
+    for (id ob in observers){
+        [[NSNotificationCenter defaultCenter] removeObserver:ob];
+    }
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

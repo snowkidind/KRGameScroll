@@ -1,0 +1,790 @@
+Introduction
+
+I wrote this tutorial to give people an impression of some of the
+reasoning behind the coding of the KRGameScroll class. You can either
+just take the code and use it or if you want to know more about it
+run this tutorial. It will detail everything that goes into integrating
+the class into a SpriteKit Scene from the gorund up. If you don't feel
+like going through the nuts and bolts of the tutorial its worth just
+looking at while you view the existing code in the project.
+
+If you have technical questions and need assistance feel free to
+contact me at keny@eastcoastbands.com
+
+Regards,
+Keny Ruyter
+
+//////==//////
+
+Open xCode and start a new project.  From the iOS menu choose “Game” and
+title it KRScroller, Use Objective-C and SpriteKit hit next and save the 
+project somewhere.
+
+As of this writing, I have had bad luck getting texture atlases to work 
+with unarchive sprite kit games. I also tend to do everything in code, 
+so I don’t really want to use a scene editor when I am pretty particular 
+about the positions of the items in my games.  I can see the benefits of 
+using an editor, but for this, I am not using it.
+
+Therefore I will be using the old method for implementing my games. Do 
+the following to revert the Sprite Kit template to the old way:
+
+Option-Click GameScene.sks and delete it.  Open GameViewController.h and 
+remove the entire SKScene (unarchive) implementation from line 12 to 
+line 29.
+
+In viewDidLoad, change the line that looks like this:
+
+GameScene *scene = [GameScene unarchiveFromFile:@"GameScene"];
+To this:
+[GameScene sceneWithSize:skView.bounds.size];
+
+
+You may want to run the program several times as we build it in the 
+simulator. That way you can tell what errors you may have made along the 
+way.
+
+Drag the 4 NavBox image files, goTo.png and the KRGameScroll.h and
+KRGameScroll.m to the file Navigator pane in Xcode. Select copy items
+if needed.  Make sure KRScroller is checked in “Add to Targets” and
+hit finish. You should see the files appear in the file Navigator, Alligator.
+
+If you build now you will see that the class “MenuPageTemplate.h” is 
+missing. We will make that now:
+
+File: New File: iOS: Source: Cocoa Touch Class -> Next
+*Name it MenuPageTemplate, subclass of SKSpriteNode , Objective-C -> Next
+Add to KRScroller target and create.
+
+*It is important to note that this file must be named exactly as written.
+
+This is a good time to consider what exactly we are building as this 
+class can have a couple different identities. On one hand, we could use 
+this and put all of our menu page code for every menu page here. On the 
+other we could copy and paste this class and use it as a template for 
+several MenuPages where we could use this code as a starting point to 
+modify from. It really depends on the complexity of your app. For the 
+sake of the tutorial and KISS, we will load the same scene with 
+different menu pages.
+
+The first thing each menuPage instance must need is an identifier. This 
+way it can be assigned a unique number so that it can react to touch 
+events as well as to know what scene to load from which page.
+
+In MenuPageTemplate.h, add an identifier property between the lines 
+@interface and @end.
+
+@property int identifier;
+
+Because we are going to need to assign this property on instantiation, 
+add a function prototype below:
+
+-	(id) initFromScene:(SKScene*)scene page:(int)page;
+
+Because we need to tell the scene to change scenes we will start with a 
+reference to the actual scene and take an argument that will become the 
+identifier.  We will need the scene to be called from a separate 
+function than init, so we’ll create an instance variable that refers to 
+the scene. While we are here let’s create two other instance variables, 
+nodes and observers which we will need.  We will also need a import 
+statement to bring in the KRGameScroll.h file. Finally we will remove 
+the NSNotification observers.
+
+Upon completion,  MenuPageTemplate.h should look exactly like this: 
+
+#import <SpriteKit/SpriteKit.h>
+#import "KRGameScroll.h"
+
+@interface MenuPageTemplate : SKSpriteNode {
+    
+    SKScene * _scene;
+    NSMutableSet *nodes;
+    NSMutableSet *observers;
+    
+}
+
+@property int identifier;
+
+- (id) initFromScene:(SKScene*)scene page:(int)page;
+- (void) removeObservers;
+
+@end
+
+You will notice that the _scene instance variable comes with an 
+underscore. There are a few naming conventions to use with an 
+underscore. In this case I am saying that “_scene is a instance variable 
+that comes from outside of my class”, while nodes and observers are 
+iVars that were created directly in the class. Xcode makes it easy to 
+identify iVars because they are typically colored blue, changing the 
+mentality that one must use an underscore to specify an instance 
+variable.
+
+Switch to MenuPageTemplate.m and add this init method, between 
+@implementation and @end:
+
+#import "MenuPageTemplate.h"
+
+@implementation MenuPageTemplate
+
+- (id)initFromScene:(SKScene*)scene page:(int)page{
+    self = [super init];
+    if (self) {
+        
+        _scene = scene;
+        
+        // store node references into array for reference
+        nodes = [[NSMutableSet alloc]initWithObjects: nil];
+        
+        // KRGameScroll will get the touches
+        // and pass them here via NSNotification.
+        [self registerObservers];
+        
+        // begin page specific content here
+        
+        // end page specific content
+    }
+    return self;
+}
+@end
+
+First we assign the scene reference to _scene. When we finally load the 
+next scene we need to tell the scene to change.
+
+For the record: For some reason the scene doesn't behave quite like 
+expected if you just tell self.view to present a scene. You get 
+multithread issues from dead scenes. These errors are under the hood of 
+spriteKit so this is a workaround.
+
+Next, initialize the nodes array. Nodes will contain the nodes we want 
+to react to should a user touch one.
+
+And finally, we create a call to registerObservers. Let’s make that one 
+next. Add these two functions before @end:
+
+- (void) registerObservers {
+    
+    // Observe Touch event messages from KRGameScroll class, who is receiving touch events
+    self ->observers = [NSMutableSet set];
+    __weak __typeof(self) weaklyNotifiedSelf = self;
+    
+    id ob = [[NSNotificationCenter defaultCenter] addObserverForName:@"touchesBegan" object:nil queue:nil usingBlock:^(NSNotification *n) {
+        NSDictionary *update = [n object];
+        [weaklyNotifiedSelf notificationTouchBegan:update];
+    }];
+    
+    [observers addObject:ob];
+    
+    id ob1 = [[NSNotificationCenter defaultCenter] addObserverForName:@"touchesEnded" object:nil queue:nil usingBlock:^(NSNotification *n) {
+        NSDictionary *update = [n object];
+        [weaklyNotifiedSelf notificationTouchEnded:update];
+    }];
+    
+    [observers addObject:ob1];
+    
+    
+    id ob2 = [[NSNotificationCenter defaultCenter] addObserverForName:@"screenChanged" object:nil queue:nil usingBlock:^(NSNotification *n) {
+        NSNumber *screen = [n object];
+        [weaklyNotifiedSelf notificationScreenChanged:screen];
+    }];
+    
+    [observers addObject:ob2];
+}
+
+- (void) removeObservers {
+    nodes = nil;
+    for (id ob in observers){
+        [[NSNotificationCenter defaultCenter] removeObserver:ob];
+    }
+}
+
+To stay on target, I will not cover observers in this tutorial, although 
+I recommend Matt Neuburg’s interpretation of NSNotifications in his 
+book, “Programming iOS …”
+
+What we do here is we create all that is necessary to listen for 
+messages sent from the KRGameScroll class. The three callbacks will 
+handle significant scroll events during the life of the scene.
+
+Now let’s implement those callbacks. Add this between init and 
+registerObservers and build to check for errors:
+
+// use touchBegan for selection Animations and sound responsiveness
+- (void) notificationTouchBegan:(NSDictionary*) info {
+    
+}
+- (void) notificationTouchEnded:(NSDictionary*) info {
+    
+}
+
+// This notification can be useful if you want to start
+// an animation or run audio when a page is scrolled upon.
+- (void) notificationScreenChanged:(NSNumber*)screen {
+    if ([screen intValue] == _identifier){
+        // NSLog(@"Moved to screen: %@", screen);
+    }
+}
+
+We will get to coding in those functions, but first let’s get the class 
+integrated into the scene now that it is somewhat formidable. Go to 
+GameScene.m and delete everything inside didMoveToView and also remove 
+the contents of touchesBegan:
+
+-(void)didMoveToView:(SKView *)view {
+    
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+
+}
+
+
+import KRGameScroll.h and MenuPageTemplate.h at the top below #import:
+
+#import "KRGameScroll.h"
+#import "MenuPageTemplate.h"
+
+Now the files we just created are connected to the scene. We can 
+initialize them!
+
+First, in didMoveToView initialize the KRGameScroll object:
+
+KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self vertical:NO];
+
+Now let’s add some pages to it right after the call to initialize the 
+scrollMenu
+
+    // here we make menu pages and add them to the stack
+    MenuPageTemplate *menuPage = [[MenuPageTemplate alloc] initFromScene:self page:1];
+    [scrollMenu.pages addObject:menuPage];
+    
+    MenuPageTemplate *menuPage2 = [[MenuPageTemplate alloc] initFromScene:self page:2];
+    [scrollMenu.pages addObject:menuPage2];
+    
+    MenuPageTemplate *menuPage3 = [[MenuPageTemplate alloc] initFromScene:self page:3];
+    [scrollMenu.pages addObject:menuPage3];
+    
+    MenuPageTemplate *menuPage4 = [[MenuPageTemplate alloc] initFromScene:self page:4];
+    [scrollMenu.pages addObject:menuPage4];
+
+Below that, tell the program to draw the pages: 
+
+	[scrollMenu drawPagesAtIndex:1]; // place at starting index 
+
+Next, We are going to use NSUserDefaults to remember what page the user 
+was on last. Add this code to read from a NSUserDefault Add this right 
+below the call to draw pages:
+
+	[self addChild:scrollMenu];
+
+Build and Run the app. You should see 4 squares at the bottom of the
+page. Nothing will happen if you click anywhere because we haven’t
+implemented that code yet. Return to MenuPageTemplate.m and lets
+implement the user touch functions…
+
+Add this code in notificationTouchBegan:
+
+// 1.
+    NSNumber *currentScreen = [info objectForKey:@"currentScreen"];
+    if ([currentScreen intValue] == _identifier){
+        
+// 2.
+        NSSet *touches = [info objectForKey:@"touches"];
+        UITouch *touch = [touches anyObject];
+        CGPoint location = [touch locationInNode:self];
+        
+// 3.
+        SKNode *nodeAtPoint;
+        for (SKNode *selectedNode in [self nodesAtPoint:location]){
+            
+            // check to see if button is named
+            // might need to tweak this for multiple named nodes at the same point
+            if (selectedNode.name){
+                nodeAtPoint = selectedNode;
+            }
+        }
+  // 4. 
+	  for (id buttonNode in nodes){
+            if ([buttonNode isEqual:nodeAtPoint]){
+                // [[SoundManager sharedManager] playSample:@"BrushClk.caf" volume:1];
+                // [self scaleAction:nodeAtPoint];
+            }
+        }
+    }
+
+1. the argument supplied to this is an NSDictionary. It contains a few 
+things we might need. An event (unused), touches, and the currentScreen. 
+Here we extract the current screen and compare it with the _identifier 
+property. This allows us to determine that the correct instance is 
+responding to touches, and ensures that the other instances are ignoring 
+the touch notification.
+
+But something seems amiss, because we never set the _identifier 
+property. It is correct though. Let’s have a look at the KRGameScroll.m 
+file. Go to the routine labeled drawPagesAtIndex. (line 77) Here we can 
+see that we create a file using MenuPageTemplate and that we already set 
+it’s identifier property here. We called this routine from the gameScene 
+class. It should also be noted that the class we are creating is 
+mandatory to be named as it is because we are referencing it here in the 
+KRGameScroller class. Thusly, I named the class a template… Ok back to 
+explaining the method:
+
+2. This is typical code you see handling touches. First it takes our 
+touches event and assigns it to an NSSet, which then begets our UITouch, 
+which then allows us to get the location of said touch.
+
+3.	nodeAtPoint. Here we get the nodes that exist at the point we 
+just determined in No.2. We iterate the nodes, looking for one which is 
+named. (this may become an issue later in life, because what if there 
+are more than one named node at a location?) We then determine the 
+nodeAtPoint is the named node.
+
+4. Now that we have a node with a name, we need to compare it against 
+the nodes we have created. (We haven’t created them yet) So when we 
+create these nodes, we will add a reference to them in the nodes array 
+in order to determine the actual node that was selected. Inside, this we 
+run a scale action to make the node bulb up when it is selected. You can 
+see also that this would be a good place to put a tick sound should you 
+want audio on your scroll page.
+
+
+Lets implement similar code for notificationTouchEnded. Put this code 
+inside it:
+
+    NSNumber *currentScreen = [info objectForKey:@"currentScreen"];
+    
+    if ([currentScreen intValue] == _identifier){
+        
+        NSSet *touches = [info objectForKey:@"touches"];
+        UITouch *touch = [touches anyObject];
+        CGPoint location = [touch locationInNode:self];
+        
+        SKNode *nodeAtPoint;
+        for (SKNode *selectedNode in [self nodesAtPoint:location]){
+            
+            // check to see if button is named
+            // might need to tweak this for multiple named nodes at the same point
+            if (selectedNode.name){
+                nodeAtPoint = selectedNode;
+            }
+        }
+        
+        for (id buttonNode in nodes){
+            
+            // Load selected scene if correct button
+            // in this case as long as any button on a given page is selected,
+            // the same scene per page will load
+            if ([buttonNode isEqual:nodeAtPoint]){
+                
+                NSLog(@"Start Scene %i at Level: %@", _identifier, nodeAtPoint.name);
+                
+  
+            }
+        }
+    }
+
+This uses pretty much the exact code as the previous function. Only this 
+time the user has lifted up on their finger, so we know it is a 
+committal touch if it is over something.
+
+notificationScreenChanged tells you when a screen changes. KRGameScroll 
+notifies you when the page has finished turning, so you can play an 
+audio sound or start an animation.
+
+Now that we are a bit closer with our class, lets make some visible 
+elements to begin testing our interface.
+
+In initFromScene, add the following between the page-specific content 
+comments
+       
+// begin page-specific content here
+        
+// the class assumes you are using the entire screen
+        CGRect screenRect = [[UIScreen mainScreen] bounds];
+        
+// may want to determine font size based on phone / tablet
+        int fontSize = 24;
+
+ // we will add a button here in a sec
+
+        NSString *pageTitle;
+    
+        switch (page) {
+                
+            case 1: pageTitle = @"Rad Game 1"; break;
+            case 2: pageTitle = @"Rad Game 2"; break;
+            case 3: pageTitle = @"Rad Game 3"; break;
+            case 4: pageTitle = @"Rad Game 4"; break;
+                
+            default:
+                break;
+        }
+        
+        SKLabelNode *pageLabel = [SKLabelNode labelNodeWithFontNamed:@"Thonburi-Bold"];
+        pageLabel.fontSize = fontSize;
+        pageLabel.text = pageTitle;
+        pageLabel.fontColor = [UIColor colorWithRed:0.232132 green:0.224964 blue:0.235748 alpha:1.0];
+        pageLabel.position = CGPointMake(screenRect.size.width/10 * 5,screenRect.size.height/10 * 2);
+        [self addChild:pageLabel];
+
+// end page specific content
+
+Now that there is a label, build and run the app. You should be able to 
+touch and drag the label, which will scroll the scene to the next page!
+
+A couple things yet to do. We need to make buttons to load the next 
+scene and we need to add some frilly-frills to make it a little more 
+cool.
+
+First the functional stuff.
+
+Replace // we will add a button here in a sec
+ With the following:
+
+        SKTexture *btnTex = [SKTexture textureWithImageNamed:@"goTo.png"];
+        [self drawButtonArrayWithTexture: btnTex];
+
+and now add the function that draws the button array between init and 
+notificationTouchBegan:
+
+// Just to keep things simple we assume each page has 9 buttons.
+// This is a good reason to switch to architecture 2
+- (void) drawButtonArrayWithTexture:(SKTexture*)texture {
+    
+    // init and draw nodes, add reference to array
+    CGRect screenRect = [[UIScreen mainScreen] bounds];
+    
+    int border = screenRect.size.width / 10 * 3; // 30 percent outside border: edge to center of outside tile
+    int totalBorder = border * 2;
+    int useableArea = screenRect.size.width - totalBorder;
+    int columns = 3;
+    int spans = columns - 1;
+    int span = useableArea / spans;
+    int startPoint = border;
+    
+    // Row 1
+    for (int i = 0; i < columns; i++){
+        
+        SKSpriteNode *menuBtn = [SKSpriteNode spriteNodeWithTexture:texture];
+        menuBtn.position = CGPointMake(startPoint, screenRect.size.height/10 * 7.5);
+        [self addChild:menuBtn];
+        menuBtn.name = [NSString stringWithFormat:@"%i", i + 1];
+        [nodes addObject:menuBtn];
+        
+        startPoint += span;
+    }
+    
+    startPoint = border;
+    
+    // Row 2
+    for (int i = 0; i < columns; i++){
+        
+        SKSpriteNode *menuBtn = [SKSpriteNode spriteNodeWithTexture:texture];
+        menuBtn.position = CGPointMake(startPoint, screenRect.size.height/10 * 6);
+        [self addChild:menuBtn];
+        menuBtn.name = [NSString stringWithFormat:@"%i", i + 1 + 3];
+        [nodes addObject:menuBtn];
+        
+        startPoint += span;
+    }
+    
+    startPoint = border;
+    
+    // Row 3
+    for (int i = 0; i < columns; i++){
+        
+        SKSpriteNode *menuBtn = [SKSpriteNode spriteNodeWithTexture:texture];
+        menuBtn.position = CGPointMake(startPoint, screenRect.size.height/10 * 4.5);
+        [self addChild:menuBtn];
+        menuBtn.name = [NSString stringWithFormat:@"%i", i + 1 + 6];
+        [nodes addObject:menuBtn];
+        
+        startPoint += span;
+    }
+}
+
+I won’t go over details of this function, but the basics here is that it 
+draws a 3x3 array of buttons and assigns each one an identity so that, 
+when the user clicks it, it’s identity will be passed to the next scene 
+so that it knows which level to start on.
+
+On more frill: Lets scale up the buttons as we touch them. In 
+notificationTouchBegan, uncomment [self scaleAction:nodeAtPoint];
+
+And now, add this function between notificationScreenChanged and 
+registerObservers:
+
+// This is to give a little popUp action when needed
+-(void) scaleAction:(SKNode*)node {
+    
+    float scaleD = .95;
+    float rtnScale = 1;
+    float scaleU =  1.05;
+    
+    NSMutableArray *scaleAct = [NSMutableArray arrayWithObjects: nil];
+    
+    SKAction *scaleDown = [SKAction scaleTo:scaleD duration:kNodeSelectDuration];
+    SKAction *scaleUp = [SKAction scaleTo:scaleU duration:kNodeSelectDuration];
+    SKAction *scaleRtn = [SKAction scaleTo:rtnScale duration:kNodeSelectDuration];
+    
+    [scaleAct addObject:scaleDown];
+    [scaleAct addObject:scaleUp];
+    [scaleAct addObject:scaleRtn];
+    
+    [node runAction:[SKAction sequence:scaleAct]];
+    
+}
+
+you may want to tweak the animation speed so I made it in the form of a 
+constant to be pasted at the top of the file after @implementation 
+MenuPageTemplate:
+
+# define kNodeSelectDuration .15
+
+If you run now, the nodes should scale-animate when you click them
+
+After you add this you should be able to build and run and see that the 
+various buttons yield different results in NSLog. Almost there! But we 
+need to load a scene first.
+
+In NotificationTouchEnded, where the NSLog entry is, add the following code: 
+
+
+                // Load your game scene here
+                AnotherScene * newScene = [AnotherScene sceneWithSize:[[UIScreen mainScreen] bounds].size];
+                 
+                // i like to set a property on the new scene to establish level
+                newScene.startLevel = nodeAtPoint.name;
+                
+                // Transition to the new scene: Must set pause outgoing to NO to complete selection animations
+                SKTransition *tranny = [SKTransition crossFadeWithDuration:1];
+                tranny.pausesOutgoingScene = NO;
+                 
+                SKView * skView = _scene.view;
+                [skView presentScene:newScene transition:tranny];
+
+                // Finally to call begin on the new scene
+                [newScene begin];
+                
+                // This is for cleanup code that kills KRGameScroll
+                NSArray *update = [NSArray arrayWithObjects:@"sceneWillChange", newScene ,nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"sceneChange" object:update];
+
+Of course, since we are calling upon a scene we haven’t created yet, we 
+are getting a slue of errors. Lets fix that. New File -> iOS -> 
+CocoaTouchClass
+
+Call it AnotherScene and make it inherit from SKScene, add to target and save. 
+
+Lets put some boilerplate code in there to get us started…
+
+In AnotherScene.h replace the existing code with the following code: 
+
+#import <SpriteKit/SpriteKit.h>
+
+@interface AnotherScene : SKScene {
+    NSMutableSet *nodes;
+}
+@property NSString* startLevel;
+
+ - (void) begin;
+
+@end
+
+and in AnotherScene.m lets do the same thing:
+
+
+#import "AnotherScene.h"
+#import "GameScene.h"
+
+@implementation AnotherScene
+
+-(id)initWithSize:(CGSize)size {
+    
+    if (self = [super initWithSize:size]) {
+
+        self.userInteractionEnabled = YES;
+        
+        // store nodes into array for quick reference
+        nodes = [[NSMutableSet alloc]initWithObjects: nil];
+        
+        // A Button
+        SKTexture *btnTex = [SKTexture textureWithImageNamed:@"goTo.png"];
+        SKSpriteNode *menuBtn = [SKSpriteNode spriteNodeWithTexture:btnTex];
+        menuBtn.position = CGPointMake(size.width/10*8, size.height/10*2);
+        [self addChild:menuBtn];
+        [nodes addObject:menuBtn];
+
+    }
+    return self;
+}
+
+- (void) begin{
+
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"verticalScroll"])
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"verticalScroll"];
+    else [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"verticalScroll"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    UITouch *touch = [touches anyObject];
+    CGPoint location = [touch locationInNode:self];
+    SKNode *node = [self nodeAtPoint:location];
+    
+    // iterate through select nodes to determine what scene to load etc
+    for (id buttonNode in nodes){
+        
+        if ([buttonNode isEqual:node]){
+            
+            // handle on the original scene
+            SKView * skView = self.view;
+            GameScene * newScene = [GameScene sceneWithSize:[[UIScreen mainScreen] bounds].size];
+
+            [skView presentScene:newScene];
+            
+        }
+    }
+}
+
+- (void)dealloc
+{
+    // NSLog(@"AnotherScene: Dealloc");
+}
+
+@end
+
+Now lets link this new scene to the outgoing scene, MenuPageTemplate.m 
+by adding it to the include statements at the top:
+
+#import "AnotherScene.h" 
+
+
+So one issue we currently have is that the app is not remembering what 
+page the user was on. Let’s fix that.. In this case we want to remember 
+where the user was but we also need to know where to begin. So let’s use 
+this code in AppDelegate.m inside didFinishLaunchingWithOptions to 
+initialize the user default to tell the app what page to initially go 
+to… This code can be useful for other things as well so I added an empty 
+if to handle the case of things that I may want to do every time the app 
+launches.
+
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"HasLaunchedOnce"])
+    {
+        // Add default settings you want to establish every launch
+    }
+    else
+    {
+        NSLog(@"Time to make the Donuts");
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasLaunchedOnce"];
+        [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:@"scrollPage"];
+    }
+
+Now let’s read from that default when we start the app to select the 
+proper page. In GameScene.m, just before we add scrollMenu to the scene, 
+add this:
+
+        // if we are starting the program from install, index is set in App Delegate
+    // index auto scrolls to last selected page.
+    int scrollPage = (int)[[NSUserDefaults standardUserDefaults] integerForKey:@"scrollPage"];
+    [scrollMenu initialMoveToPage:scrollPage]; // animate to selected position.
+   
+If you run your app and change scenes now, it will remember your last 
+known position and go there on startup of the scene. It even persists 
+between launches. A note about NSUserDefaults and the iOS simulator: you 
+may at times need to clear them and in that case you can go into the 
+simulator and “Reset Content and Settings” under the iOS Simulator menu.
+
+Lets look at the code we pasted in into Another scene for a second. In 
+the template file, begin was called and is writing information to 
+defaults. What is it doing?
+
+ Go back to Game Scene and the first line of code inside didMoveToView. 
+Replace the line that calls for a newKRGameScroll with this code, which 
+reads from that template and puts the Boolean value in place of the 
+vertical argument:
+
+    // this default will alternate every time you load the game scene. see AnotherScene.m
+    BOOL vertical = [[NSUserDefaults standardUserDefaults] boolForKey:@"verticalScroll"];
+    KRGameScroll *scrollMenu = [[KRGameScroll alloc] initWithScene:self vertical:vertical];
+
+Save, Run and test the App. Every time you load the Menu Scene now, it 
+will alternate between vertical and horizontal views. Charming, right? 
+You probably do not want that behavior but it is nice to see the 
+functions of KRGameScroll.
+
+Lets take a look at some of the tweaks you can make to KRGameScroll to 
+affect it’s behavior.
+
+In KRGameScroll.m, go to loadExternalPage. This function is called when 
+you scroll to the end of the page. It broadcasts a message called 
+loadExternalPage let’s implement a listener in the gamescene to handle 
+such an action.
+
+In GameScene.h, add an NSMutable set instanceVariable called observers:
+
+@interface GameScene : SKScene {
+    NSMutableSet *observers;
+}
+@end
+
+and in GameScene.m, add the following three methods below TouchesBegan:
+
+- (void) loadExternalPage {
+    NSLog(@"loadExternalPage");
+}
+
+- (void) registerObservers {
+    self ->observers = [NSMutableSet set];
+    __weak __typeof(self) weaklyNotifiedSelf = self;
+    
+    id ob = [[NSNotificationCenter defaultCenter] addObserverForName:@"loadExternalPage" object:nil queue:nil usingBlock:^(NSNotification *n) {
+        [weaklyNotifiedSelf loadExternalPage];
+    }];
+    [observers addObject:ob];
+}
+
+- (void) removeObservers {
+    for (id ob in observers){
+        [[NSNotificationCenter defaultCenter] removeObserver:ob];
+    }
+}
+
+Now, add the observer function in the beginning of the didMoveToView 
+block of the game scene:
+
+[self registerObservers];
+
+
+
+Build and run, scroll to the end and see that loadExternalPage was 
+called.
+
+Now let’s look at the custom configuration variables. They are
+accessible in two places in the class. At the top and in the
+prepareScroller method:
+
+/ custom configuration variables 1 of 2
+#define kShortDragDuration .10
+#define kLongDragDuration .25
+   
+kShortDragDuration is the time it takes for the scroller to return to a 
+normal state after an “Illegal” move. An illegal move is considered: the 
+user scrolled, but did not scroll past the threshold for when to go to 
+the next page; also if the user scrolled to either end of the scroll 
+menu and there were no more pages to display.
+
+kLongDragDuration is the time it takes to scroll from the point where 
+the user lets go to the final resting place in the next displayed page
+
+
+ // custom configuration variables 2 of 2
+    showNavBoxes = YES;
+    minimumSlideLength = 5;
+    minimumDragThreshold = 20;
+
+showNavBoxes turns on / off the navigation boxes minimumSlideLength is 
+the length a user must move their finger in order to move the scroller 
+graphic at all. minimumDragThreshold is the threshold a user must move 
+their finger in order to trigger a moving to another page.
+

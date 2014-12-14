@@ -23,6 +23,7 @@
 		06F8E1E61A3BAD8D00552158 /* largeNavBox.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E21A3BAD8D00552158 /* largeNavBox.png */; };
 		06F8E1E81A3BAE0400552158 /* goTo.png in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1E71A3BAE0400552158 /* goTo.png */; };
 		06F8E1EB1A3BB74600552158 /* AnotherScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 06F8E1EA1A3BB74600552158 /* AnotherScene.m */; };
+		06F8E1EF1A3CEB6100552158 /* ReadMe.txt in Resources */ = {isa = PBXBuildFile; fileRef = 06F8E1EE1A3CEB6100552158 /* ReadMe.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,8 @@
 		06F8E1E71A3BAE0400552158 /* goTo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = goTo.png; sourceTree = "<group>"; };
 		06F8E1E91A3BB74600552158 /* AnotherScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnotherScene.h; sourceTree = "<group>"; };
 		06F8E1EA1A3BB74600552158 /* AnotherScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnotherScene.m; sourceTree = "<group>"; };
+		06F8E1EE1A3CEB6100552158 /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ReadMe.txt; path = ../ReadMe.txt; sourceTree = "<group>"; };
+		06F8E2511A3D4AC400552158 /* tutorial.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = tutorial.txt; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,26 +106,17 @@
 		06F8E1A51A3B9DB600552158 /* KRGameScroll */ = {
 			isa = PBXGroup;
 			children = (
+				06F8E1EE1A3CEB6100552158 /* ReadMe.txt */,
+				06F8E2511A3D4AC400552158 /* tutorial.txt */,
+				06F8E1EC1A3CEAC000552158 /* KRGameScroll */,
 				06F8E1AA1A3B9DB600552158 /* AppDelegate.h */,
 				06F8E1AB1A3B9DB600552158 /* AppDelegate.m */,
-				06F8E1AD1A3B9DB600552158 /* GameScene.h */,
-				06F8E1AE1A3B9DB600552158 /* GameScene.m */,
-				06F8E1D11A3BA22A00552158 /* KRGameScroll.h */,
-				06F8E1D21A3BA22A00552158 /* KRGameScroll.m */,
-				06F8E1D41A3BA5A600552158 /* MenuPageTemplate.h */,
-				06F8E1D51A3BA5A600552158 /* MenuPageTemplate.m */,
 				06F8E1B21A3B9DB600552158 /* GameViewController.h */,
 				06F8E1B31A3B9DB600552158 /* GameViewController.m */,
+				06F8E1AD1A3B9DB600552158 /* GameScene.h */,
+				06F8E1AE1A3B9DB600552158 /* GameScene.m */,
 				06F8E1E91A3BB74600552158 /* AnotherScene.h */,
 				06F8E1EA1A3BB74600552158 /* AnotherScene.m */,
-				06F8E1B51A3B9DB600552158 /* Main.storyboard */,
-				06F8E1B81A3B9DB600552158 /* Images.xcassets */,
-				06F8E1BA1A3B9DB600552158 /* LaunchScreen.xib */,
-				06F8E1DF1A3BAD8D00552158 /* largeNavBox@2x.png */,
-				06F8E1E01A3BAD8D00552158 /* smallNavBox.png */,
-				06F8E1E11A3BAD8D00552158 /* smallNavBox@2x.png */,
-				06F8E1E21A3BAD8D00552158 /* largeNavBox.png */,
-				06F8E1E71A3BAE0400552158 /* goTo.png */,
 				06F8E1A61A3B9DB600552158 /* Supporting Files */,
 			);
 			path = KRGameScroll;
@@ -131,6 +125,9 @@
 		06F8E1A61A3B9DB600552158 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				06F8E1B51A3B9DB600552158 /* Main.storyboard */,
+				06F8E1B81A3B9DB600552158 /* Images.xcassets */,
+				06F8E1BA1A3B9DB600552158 /* LaunchScreen.xib */,
 				06F8E1A71A3B9DB600552158 /* Info.plist */,
 				06F8E1A81A3B9DB600552158 /* main.m */,
 			);
@@ -152,6 +149,30 @@
 				06F8E1C61A3B9DB600552158 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		06F8E1EC1A3CEAC000552158 /* KRGameScroll */ = {
+			isa = PBXGroup;
+			children = (
+				06F8E1ED1A3CEB0000552158 /* Images */,
+				06F8E1D11A3BA22A00552158 /* KRGameScroll.h */,
+				06F8E1D21A3BA22A00552158 /* KRGameScroll.m */,
+				06F8E1D41A3BA5A600552158 /* MenuPageTemplate.h */,
+				06F8E1D51A3BA5A600552158 /* MenuPageTemplate.m */,
+			);
+			name = KRGameScroll;
+			sourceTree = "<group>";
+		};
+		06F8E1ED1A3CEB0000552158 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				06F8E1DF1A3BAD8D00552158 /* largeNavBox@2x.png */,
+				06F8E1E01A3BAD8D00552158 /* smallNavBox.png */,
+				06F8E1E11A3BAD8D00552158 /* smallNavBox@2x.png */,
+				06F8E1E21A3BAD8D00552158 /* largeNavBox.png */,
+				06F8E1E71A3BAE0400552158 /* goTo.png */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,6 +262,7 @@
 				06F8E1E61A3BAD8D00552158 /* largeNavBox.png in Resources */,
 				06F8E1E31A3BAD8D00552158 /* largeNavBox@2x.png in Resources */,
 				06F8E1E51A3BAD8D00552158 /* smallNavBox@2x.png in Resources */,
+				06F8E1EF1A3CEB6100552158 /* ReadMe.txt in Resources */,
 				06F8E1B71A3B9DB600552158 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
