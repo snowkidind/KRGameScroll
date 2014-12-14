@@ -23,6 +23,14 @@ horizontally or vertically. It is designed to work with the entire
 screen of the device. It contains navigation boxes that tell you what 
 page you are on.
 
+The reasoning behind such a class is because it is complicated to add
+UIView Items directly to a spriteKit scene. In order to do that, you must
+tell the view controller to add the subview. In most cases where a simple
+scrolling window is needed, you can just add this object to your scene
+and display custom pages directly from your scene, without involving
+the ViewController. In the case of KRGameScroll, there is no "view"
+object, only a nicely fitting node along the spriteKit node tree.
+
 See the file tutorial.txt to get more depth about the structure of the 
 app. It covers building the included scroller app from scratch, save for 
 the KRGameScroll class.
